@@ -13,9 +13,14 @@ public class PianoMidiPlayerPlugin: NSObject, FlutterPlugin {
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
         case "playMidi":
-            if let args = call.arguments as? [String: String],
-               let midiURL = args["midiPath"]{
+            if let midiURL = call.arguments as? String {
                 self.playMidi(midiURL: midiURL, result: result)
+            } else {
+                result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid arguments", details: nil))
+            }
+        case "playMidiData":
+            if let midiData = call.arguments as? FlutterStandardTypedData {
+                self.playMidi(data: midiData.data, result: result)
             } else {
                 result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid arguments", details: nil))
             }
@@ -38,6 +43,7 @@ public class PianoMidiPlayerPlugin: NSObject, FlutterPlugin {
             result(FlutterError(code: "INVALID_URL", message: "Invalid midi file URL", details: nil))
             return
         }
+        
         // Download MIDI file
         downloadFile(from: midiFileURL) { [weak self] midiLocalURL in
             guard let midiLocalURL = midiLocalURL else {
@@ -45,8 +51,8 @@ public class PianoMidiPlayerPlugin: NSObject, FlutterPlugin {
                 return
             }
             
-            
             do {
+                self?.midiPlayer?.stop()
                 self?.midiPlayer = try AVMIDIPlayer(contentsOf: midiLocalURL, soundBankURL: soundBankURL)
                 self?.midiPlayer?.prepareToPlay()
                 self?.midiPlayer?.play()
@@ -54,10 +60,26 @@ public class PianoMidiPlayerPlugin: NSObject, FlutterPlugin {
             } catch {
                 result(FlutterError(code: "PLAYER_ERROR", message: "Failed to create AVMIDIPlayer: \(error.localizedDescription)", details: nil))
             }
-            
         }
     }
     
+    func playMidi(data: Data, result: @escaping FlutterResult) {
+        // Load Sound Bank file
+        guard let soundBankURL = Bundle(for: type(of: self)).url(forResource: "UprightPianoKW-20190703", withExtension: "sf2") else {
+            result(FlutterError(code: "INVALID_URL", message: "Sound bank file not found", details: nil))
+            return
+        }
+
+        do {
+            self.midiPlayer?.stop()
+            self.midiPlayer = try AVMIDIPlayer(data: data, soundBankURL: soundBankURL)
+            self.midiPlayer?.prepareToPlay()
+            self.midiPlayer?.play()
+            result("Playing MIDI")
+        } catch {
+            result(FlutterError(code: "PLAYER_ERROR", message: "Failed to create AVMIDIPlayer: \(error.localizedDescription)", details: nil))
+        }
+    }
     
     func stopMidi() {
         midiPlayer?.stop()

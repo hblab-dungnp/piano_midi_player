@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:piano_midi_player/piano_midi_player_method_channel.dart';
 import 'package:piano_midi_player/piano_midi_player_platform_interface.dart';
@@ -8,6 +10,11 @@ class MockPianoMidiPlayerPlatform
     implements PianoMidiPlayerPlatform {
   @override
   Future<void> playMidi(String midiURL) async {
+    return;
+  }
+
+  @override
+  Future<void> playMidiData(Uint8List data) async {
     return;
   }
 

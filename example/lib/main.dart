@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:piano_midi_player/piano_midi_player.dart';
 
 void main() {
@@ -29,7 +30,7 @@ class MidiPlayer extends StatefulWidget {
 }
 
 class _MidiPlayerState extends State<MidiPlayer> {
-  final _PianoMidiPlayerPlugin = PianoMidiPlayer();
+  final _pianoMidiPlayerPlugin = PianoMidiPlayer();
 
   @override
   Widget build(BuildContext context) {
@@ -38,14 +39,29 @@ class _MidiPlayerState extends State<MidiPlayer> {
       children: <Widget>[
         ElevatedButton(
           onPressed: () {
-            _PianoMidiPlayerPlugin.playMidi(
+            _pianoMidiPlayerPlugin.playMidi(
               'https://upload.wikimedia.org/wikipedia/commons/5/55/MIDI_sample.mid',
             );
           },
-          child: const Text('Play MIDI'),
+          child: const Text('Play MIDI Url'),
         ),
         ElevatedButton(
-          onPressed: _PianoMidiPlayerPlugin.stopMidi,
+          onPressed: () async {
+            final response = await http.get(Uri.parse(
+                'https://upload.wikimedia.org/wikipedia/commons/5/55/MIDI_sample.mid'));
+
+            if (response.statusCode != 200) {
+              debugPrint("Failed to download MIDI: '${response.statusCode}'.");
+              return;
+            }
+            _pianoMidiPlayerPlugin.playMidiData(
+              response.bodyBytes,
+            );
+          },
+          child: const Text('Play MIDI Data'),
+        ),
+        ElevatedButton(
+          onPressed: _pianoMidiPlayerPlugin.stopMidi,
           child: const Text('Stop MIDI'),
         ),
       ],

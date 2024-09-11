@@ -12,9 +12,18 @@ class MethodChannelPianoMidiPlayer extends PianoMidiPlayerPlatform {
   @override
   Future<void> playMidi(String midiURL) async {
     try {
-      final result =
-          await methodChannel.invokeMethod('playMidi', {'midiPath': midiURL});
-      print(result);
+      final result = await methodChannel.invokeMethod('playMidi', midiURL);
+      debugPrint(result);
+    } on PlatformException catch (e) {
+      debugPrint("Failed to play MIDI: '${e.message}'.");
+    }
+  }
+
+  @override
+  Future<void> playMidiData(Uint8List data) async {
+    try {
+      final result = await methodChannel.invokeMethod('playMidiData', data);
+      debugPrint(result);
     } on PlatformException catch (e) {
       debugPrint("Failed to play MIDI: '${e.message}'.");
     }

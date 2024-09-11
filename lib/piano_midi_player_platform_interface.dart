@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'piano_midi_player_method_channel.dart';
@@ -25,6 +27,10 @@ abstract class PianoMidiPlayerPlatform extends PlatformInterface {
 
   Future<void> playMidi(String midiURL) async {
     throw UnimplementedError('playMidi() has not been implemented.');
+  }
+
+  Future<void> playMidiData(Uint8List data) async {
+    throw UnimplementedError('playMidiData() has not been implemented.');
   }
 
   Future<void> stopMidi() async {
